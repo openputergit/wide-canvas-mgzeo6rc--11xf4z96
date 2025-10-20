@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manoj Water Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F7F8FA;
+        }
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .toast {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+    <!-- Sidebar -->
+    <nav class="sidebar w-64 bg-white shadow-lg p-4 hidden md:block">
+        <div class="flex items-center gap-2 mb-8">
+            <i class="bi bi-droplet-fill text-blue-600 text-2xl"></i>
+            <h1 class="font-bold text-xl">Manoj Water</h1>
+        </div>
+        <div class="space-y-4">
+            <a href="#dashboard" class="flex items-center gap-2 p-2 bg-blue-50 text-blue-600 rounded">
+                <i class="bi bi-grid"></i>
+                Dashboard
+            </a>
+            <a href="#customers" class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                <i class="bi bi-people"></i>
+                Customers
+            </a>
+            <a href="#receipts" class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                <i class="bi bi-receipt"></i>
+                Receipts
+            </a>
+            <a href="#reminders" class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                <i class="bi bi-bell"></i>
+                Reminders
+            </a>
+            <a href="#settings" class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                <i class="bi bi-gear"></i>
+                Settings
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <button class="md:hidden" onclick="toggleSidebar()">
+                    <i class="bi bi-list text-2xl"></i>
+                </button>
+                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                    <i class="bi bi-person"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="card bg-white p-6 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-600">Collected</p>
+                        <h3 class="text-2xl font-bold text-green-600">₹9,000</h3>
+                    </div>
+                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
+                        18/30 paid
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 60%"></div>
+                </div>
+            </div>
+
+            <div class="card bg-white p-6 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-600">Pending</p>
+                        <h3 class="text-2xl font-bold text-red-600">₹6,000</h3>
+                    </div>
+                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">
+                        12 pending
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-red-600 h-2 rounded-full" style="width: 40%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h3 class="text-lg font-semibold mb-4">Collection Trend</h3>
+            <canvas id="collectionChart" height="200"></canvas>
+        </div>
+
+        <!-- Customer Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b">
+                <div class="flex flex-wrap gap-4 justify-between items-center">
+                    <div class="relative flex-1">
+                        <i class="bi bi-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" placeholder="Search name or flat" class="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:border-blue-600">
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-gray-100 rounded-lg">All</button>
+                        <button class="px-4 py-2 bg-green-50 text-green-600 rounded-lg">Paid</button>
+                        <button class="px-4 py-2 bg-yellow-50 text-yellow-600 rounded-lg">Pending</button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Flat</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Amount</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        <tr>
+                            <td class="px-6 py-4">John Doe</td>
+                            <td class="px-6 py-4">A-101</td>
+                            <td class="px-6 py-4">
+                                <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Paid</span>
+                            </td>
+                            <td class="px-6 py-4">₹500</td>
+                            <td class="px-6 py-4">
+                                <button class="text-blue-600 hover:text-blue-800 mr-2">
+                                    <i class="bi bi-credit-card"></i>
+                                </button>
+                                <button class="text-green-600 hover:text-green-800">
+                                    <i class="bi bi-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-xl font-bold mb-4">Mark Payment</h3>
+            <form id="paymentForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Customer Name</label>
+                    <input type="text" value="John Doe" readonly class="w-full p-2 border rounded-lg bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Month</label>
+                    <select class="w-full p-2 border rounded-lg">
+                        <option>October 2023</option>
+                        <option>November 2023</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Amount</label>
+                    <input type="number" value="500" class="w-full p-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Payment Mode</label>
+                    <div class="flex gap-2">
+                        <button type="button" class="flex-1 p-2 border rounded-lg hover:bg-blue-50">Cash</button>
+                        <button type="button" class="flex-1 p-2 border rounded-lg hover:bg-blue-50">UPI</button>
+                        <button type="button" class="flex-1 p-2 border rounded-lg hover:bg-blue-50">Bank</button>
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Save & Generate Receipt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button onclick="showModal()" class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700">
+        <i class="bi bi-plus-lg text-xl"></i>
+    </button>
+
+    <script>
+        // Chart
+        const ctx = document.getElementById('collectionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                datasets: [{
+                    label: 'Collections',
+                    data: [12000, 15000, 13000, 14000, 11000, 9000],
+                    backgroundColor: '#2563EB',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => '₹' + value
+                        }
+                    }
+                }
+            }
+        });
+
+        // Modal functions
+        function showModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+
+        // Form submission
+        document.getElementById('paymentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            closeModal();
+            
+            // Show toast notification
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-green-600 text-white px-4 py-2 rounded-lg';
+            toast.textContent = 'Payment marked successfully!';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
